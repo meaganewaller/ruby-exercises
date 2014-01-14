@@ -7,21 +7,14 @@ class SecretSanta
 
   def parse_file(file)
     file.each_line do |line|
-      first_name, last_name, email = line.scan(/(\S+)\s+(\S+)\s+<(.*)>/).flatten
-      return first_name, last_name, email
+      line.match(/(\S+)\s+(\S+)\s+<(.*)>/)
+      first_name, last_name, email = $1, $2, $3
+      get_full_name(first_name, last_name)
     end
   end
 
-  def parse_list(list)
-    new_list = []
-    list.each { |line| new_list << parse_list(line) }
-    return new_list
-  end
-
-  def choose_secret_santa(first_name, last_name, list)
-    santa = list.find_all { |first, last| last != last_name && name != name }.pop 
-    list.delete(santa)
-    return santa
+  def get_full_name(first, last)
+    first + " " + last
   end
 end
 
