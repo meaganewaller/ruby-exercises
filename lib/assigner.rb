@@ -27,4 +27,8 @@ class Assigner
   def same_family?(first_person, second_person)
     first_person.last_name == second_person.last_name
   end
+
+  def find_family_by_name(name)
+    @families.find { |family| family.name == name }
+  end
 end

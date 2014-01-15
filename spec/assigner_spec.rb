@@ -39,6 +39,10 @@ describe Assigner do
     assigner.same_family?(meagan, riley).should be_false
   end
 
-  
-  
+  it "finds families by their name" do
+   family = assigner.find_family_by_name("Waller")
+   family.name.should == "Waller"
+   family.size.should == 2
+    
+  end
 end
