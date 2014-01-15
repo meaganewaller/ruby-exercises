@@ -41,6 +41,14 @@ describe Person do
 
   it "prints name nicely" do
     meagan = Person.new(meagan_details)
-    meagan.print_name.should == "Meagan Waller"
+    bob = Person.new(bob_details)
+    meagan.to_s.should == "Meagan Waller"
+  end
+
+  it "prints secret santa" do
+    meagan = Person.new(meagan_details)
+    bob = Person.new(bob_details)
+    meagan.secret_santa = bob
+    meagan.with_secret_santa.should == "Meagan Waller - secret santa: Bob Smith"
   end
 end
