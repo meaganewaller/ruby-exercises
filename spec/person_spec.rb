@@ -8,18 +8,6 @@ describe Person do
     "email"      => "meagan@something.com" 
   }
 
-  lauren_details = { 
-    "first_name" => "Lauren", 
-    "last_name"  => "Waller", 
-    "email"      => "lauren@something.com" 
-  }
-
-  bob_details = {
-    "first_name" => "Bob",
-    "last_name"  => "Smith",
-    "email"      => "bob@something.com"
-  }
-
   it "initializes with persons details" do
     person = Person.new(meagan_details)
     person.first_name.should == "Meagan"
@@ -27,28 +15,9 @@ describe Person do
     person.email.should == "meagan@something.com"
   end
 
-  it "return true if can be secret santa" do
-    meagan = Person.new(meagan_details)
-    bob = Person.new(bob_details)
-    meagan.can_be_santa_for?(bob).should be_true
-  end
-
-  it "return false if can't be secret santa" do
-    meagan = Person.new(meagan_details)
-    lauren = Person.new(lauren_details)
-    meagan.can_be_santa_for?(lauren).should be_false
-  end
-
   it "prints name nicely" do
     meagan = Person.new(meagan_details)
     bob = Person.new(bob_details)
     meagan.to_s.should == "Meagan Waller"
-  end
-
-  it "prints secret santa" do
-    meagan = Person.new(meagan_details)
-    bob = Person.new(bob_details)
-    meagan.secret_santa = bob
-    meagan.with_secret_santa.should == "Meagan Waller - secret santa: Bob Smith"
   end
 end
