@@ -1,0 +1,31 @@
+require 'spec_helper'
+
+class Assigner
+
+  def initialize(people)
+    @people = people
+  end
+
+  def assign_santas
+    [
+      {:assignee => @people.first, :assignment => @people.last},
+      {:assignee => @people.last, :assignment => @people.first}
+    ]
+  end
+end
+
+describe Assigner do
+      let(:mike) { { :first_name => "Mike", :last_name => "Jansen", :email => "mike@8thlight.com" } }
+
+  it "assigns secret santas given 2 people" do
+      meagan = { :first_name => "Meagan", :last_name => "Waller", :email => "meagan@8thlight.com" }
+
+    people = [mike, meagan]
+    assigner = Assigner.new(people)
+    assignments = assigner.assign_santas
+
+    assignments.find { |a| a[:assignee] == mike }[:assignment].should == meagan
+    assignments.find { |a| a[:assignee] == meagan }[:assignment].should == mike
+  end
+  
+end
