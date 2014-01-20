@@ -1,7 +1,3 @@
-require 'spec_helper'
-require 'pry'
-require 'pry-nav'
-
 class Assigner
   attr_reader :assignments, :santas
 
@@ -21,14 +17,8 @@ class Assigner
       @assignments = []
       assign_santas
     end
-    # p "Santas Size: #{@santas.size}"
-    # p "Does assignment include nil?: #{@assignments.include?(nil)}"
-
-    # p "Printing out Santas"
-    # @santas.each { |santa| p santa }
-
-    # p "Printing out people who have been assigned"
-    # @assignments.each { |assignment| p assignment }
+    return @santas
+    return @assignments
   end
 
 
@@ -40,11 +30,18 @@ class Assigner
   end
 end
 
+require 'spec_helper'
+require 'pry'
+require 'pry-nav'
 
 describe Assigner do
   let(:mike) { { :first_name => "Mike", :last_name => "Jansen", :email => "mike@8thlight.com" } }
   let(:meagan) { { :first_name => "Meagan", :last_name => "Waller", :email => "meagan@8thlight.com" } }
   let(:foo) { { :first_name => "Foo", :last_name => "Bar", :email => "foo@bar.com" } }
+
+  it "assigns a secret santa given 2 people" do
+    assigner = Assigner.new([mike, meagan]).assign_santas
+  end
 
   def assignment_for(assignments, assignee)
     assignments.find { |a| a[:assignee] == assignee }[:assignment]
@@ -74,10 +71,10 @@ describe Assigner do
 
   end
 
-  # it "ensures that assignments are unique" do
-  #   10.times do 
-  #     assignments = Assigner.new([mike, meagan, foo]).assign_santas
-  #     assert_assigments_are_unique(assignments)
-  #   end
-  # end
+  it "ensures that assignments are unique" do
+    10.times do 
+      assignments = Assigner.new([mike, meagan, foo]).assign_santas
+      assert_assigments_are_unique(assignments)
+    end
+  end
 end
