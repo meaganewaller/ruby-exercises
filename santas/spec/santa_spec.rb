@@ -2,6 +2,23 @@ require 'spec_helper'
 require 'pry'
 require 'pry-nav'
 
+class Person
+  attr_reader :first_name, :last_name, :email
+  attr_accessor :santa
+  
+  def initialize(line)
+    person = line.split
+    @first_name = person[0]
+    @last_name = person[1]
+    @email = person[2].delete("<>")
+    @santa = ""
+  end
+
+  def can_be_santa_of?(person)
+    @last_name != person.last_name
+  end
+end
+
 class Assigner
   def initialize(people)
     @people = people
@@ -15,11 +32,6 @@ class Assigner
         :assignment => assignment_for(person)
       }
     end
-    if everyone_has_assignment
-      puts "Awesome!"
-    else
-      assign_santas
-    end
   end
 
 
@@ -32,6 +44,23 @@ class Assigner
 
   def everyone_has_assignment
     @assignments.size == @people.size
+  end
+end
+
+describe Person do
+  it "person has first last and email" do
+    person = Person.new("Mike Jansen <mike@8thlight.com>")
+    person.first_name.should == "Mike"
+    person.last_name.should == "Jansen"
+    person.email.should == "mike@8thlight.com"
+  end
+
+  it "knows who it can be santa too" do
+    meagan = Person.new("Meagan Waller <meagan@8thlight.com>")
+    lauren = Person.new("Lauren Waller <lauren@gmail.com>")
+    mike = Person.new("Mike Jansen <mike@8thlight.com>")
+    meagan.can_be_santa_of?(lauren).should be_false
+    mike.can_be_santa_of?(meagan).should be_true
   end
 end
 
