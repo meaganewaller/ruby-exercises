@@ -41,10 +41,6 @@ class Assigner
     @assignments << assignment
     assignment
   end
-
-  def everyone_has_assignment
-    @assignments.size == @people.size
-  end
 end
 
 describe Person do
