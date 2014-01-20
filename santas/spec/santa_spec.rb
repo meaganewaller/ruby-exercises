@@ -17,11 +17,11 @@ class Assigner
       @assignments = []
       assign_santas
     end
-    # @santas.each { |santa| p santa }
-    # p "Printing out assigned"
-    # @assignments.each { |assign| p assign }
-    p "Assignee: #{@santas[0][:assignee][:last_name]} - " + "Assignment: #{@santas[0][:assignment][:last_name]}"
-    p "Assignee: #{@santas[1][:assignee][:last_name]} - " +  "Assignment: #{@santas[1][:assignment][:last_name]}"
+    (0..@santas.size - 1).each do |num|
+      if @santas[num][:assignee][:last_name] == @santas[num][:assignment][:last_name]
+        assign_santas
+      end
+    end
     return @santas
     return @assignments
   end
@@ -56,7 +56,7 @@ describe Assigner do
   def assert_assigments_are_unique(assignments)
     assignees = assignments.map { |a| a[:assignee] }
     assignments = assignments.map { |a| a[:assignment] }
-    
+
     assignments.uniq.size.should == 3
     assignees.should =~ assignments
   end
@@ -77,18 +77,18 @@ describe Assigner do
 
   end
 
-  # it "ensures that assignments are unique" do
-  #   10.times do 
-  #     assignments = Assigner.new([mike, meagan, foo]).assign_santas
-  #     assert_assigments_are_unique(assignments)
-  #   end
-  # end
+  it "ensures that assignments are unique" do
+    10.times do 
+      assignments = Assigner.new([mike, meagan, foo]).assign_santas
+      assert_assigments_are_unique(assignments)
+    end
+  end
 
-  # it "doesnt match people with the same last name" do
-  #   assignments = Assigner.new([mike, meagan, foo, lauren]).assign_santas
-  #   [meagan, foo, lauren].should include(assignment_for(assignments, mike))
-  #   [mike, foo].should include(assignment_for(assignments, lauren))
-  #   [foo, mike].should include(assignment_for(assignments, meagan))
-  #   [lauren, mike, meagan].should include(assignment_for(assignments, foo))
-  # end
+  it "doesnt match people with the same last name" do
+    assignments = Assigner.new([mike, meagan, foo, lauren]).assign_santas
+    [meagan, foo, lauren].should include(assignment_for(assignments, mike))
+    [mike, foo].should include(assignment_for(assignments, lauren))
+    [foo, mike].should include(assignment_for(assignments, meagan))
+    [lauren, mike, meagan].should include(assignment_for(assignments, foo))
+  end
 end
