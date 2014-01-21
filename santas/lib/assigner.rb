@@ -13,7 +13,7 @@ class Assigner
         :assignment => assignment_for(person)
       }
     end
-    if @assignments.include?(nil)
+    if not_everyone_assigned?
       @assignments = []
       assign_santas
     end
@@ -23,7 +23,6 @@ class Assigner
       end
     end
     return @santas
-    return @assignments
   end
 
   private
@@ -31,5 +30,9 @@ class Assigner
     assignment = (@people - [person] - @assignments).shuffle.first
     @assignments << assignment
     assignment
+  end
+
+  def not_everyone_assigned?
+    @assignments.include?(nil)
   end
 end
