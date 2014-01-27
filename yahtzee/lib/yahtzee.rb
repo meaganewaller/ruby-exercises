@@ -1,3 +1,0 @@
-class Yahtzee
-
-end
