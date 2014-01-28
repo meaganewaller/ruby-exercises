@@ -1,77 +1,118 @@
-# The runtime for this is super duper awful. It takes multiple minutes to find a word match for the number string
-# It prompts you for your 7 digit number, then it gets all the possibilties of letter combinations from the #all_possibilties method. This just returns a product of the NUMBER[num_string(0)] and NUMBER[num_string], so most of it is just complete gibberish.
-# Next after it gets all the possibilties from it looks for words in the dictionary with the #words_in_dict method. This has an empty array called found, and for every word that actually exists in the dictionary it shovels it into the found array. 
-# The way we check if a word actually exists is to set exists to false to start off with, then to open the DICT file (our dictionary) and read it. For each line if line.downcase.gsub if it equals our word, it exists. We then return true/false if it exists. This TAKES FOREVER, obviously.
-#
-# A more ideal solution might be one that searches like so:
-# Doesn't look at words over 7 letters, or under 2 letters.
-# Recursion might be a good way to look at this problem as well. Match numbers against the front of the phone number passing the matched words and what's left of the num_string down recursively until there is nothing left to match. Return an Array of chunks of the word, each chunk should be an array of all the words that can be used at that point. For example, a small part of the search results could start with a word, followed by a number: 
-# [["user"]], ["8"], ["aw", "ax", "ay", "by"]],
-# [["user"]], ["taw", "tax", "tay"]]
-#
 class PhoneDictionary
 
-  DICT = "/usr/share/dict/words"
-
-  NUMBERS = { 
-    "1" => ["1"],
-    "2" => ["a", "b", "c"],
-    "3" => ["d" ,"e", "f"],
-    "4" => ["g" ,"h", "i"],
-    "5" => ["j", "k", "l"],
-    "6" => ["m", "n", "o"],
-    "7" => ["p", "q", "r", "s"],
-    "8" => ["t", "u", "v"],
-    "9" => ["w", "x", "y", "z"],
-    "0" => ["0"]
-  }
-
-  def all_possibilities(num_string)
-    # Randomizes the letters from the number string. 
-    array = num_string.split("")
-    first = array.delete_at(0)
-    rest = array.map { |char| NUMBERS[char] }
-    word_arrays = NUMBERS[first].product(*rest)
-    word_arrays.map{ |char_array| char_array.join }
+  def initialize(dictionary)
+    @words = Hash.new { |dict, digits| dict[digits] = Array.new }
+    create_words_hash
+    read_dictionary(dictionary)
   end
 
-  def words_in_dict(words)
-    # Checks against all possibilities if the word is the in dictionary. This is really not a great implementation
-    found = []
-    words.each do |word|
-      found << word if word_exists?(word)
-    end
-    found
+  def create_words_hash
+    ("0".."9").each { |n| @words[n] << n }
   end
 
-  def word_exists?(word)
-    # Checks if the word exists in the dictionary
-    exists = false
-    File.open(DICT,'r') do |file|
-      while(line = file.gets)
-        if line.downcase.gsub(/\n/, '') == word.downcase
-          exists = true
-          break
-        end
+  def read_dictionary(dictionary)
+    File.foreach(dictionary) do |word|
+      normalize_words(word)
+      if appropriate_word(word)
+        letters = get_letters_from_word(word)
+        digits = get_digits_from_letters(letters)
+        add_to_word_hash(digits, word)
       end
     end
-    exists
   end
 
-  def words_for(num_string)
-    # Returns the words for the number string
-    all_words = all_possibilities(num_string)
-    found_words = words_in_dict(all_words)
-    found_words
+  def appropriate_word(word)
+    !word.empty? && word.size > 2 && word.size < 7
+  end
+
+  def get_letters_from_word(word)
+    word.split(//)
+  end
+
+  def get_digits_from_letters(letters)
+    letters.map { |l| encode(l) }.join
+  end
+
+  def add_to_word_hash(digits, word)
+    @words[digits] << word unless @words[digits].include?(word)
+  end
+
+  def normalize_words(word)
+    word.downcase!
+    word.delete("^a-z")
+  end
+
+  # This is our runner, it does the searching, converts the results to strings gets rid of bad
+  # results and returns our results sorted for us.
+  def number_to_words(number_string)
+    results = search(number_string)
+    results.map! { |word_chunks| word_chunks_to_strings(word_chunks) }.flatten
+    results.reject! { |words| words =~ /\d-\d/ }
+    results.sort!
+  end
+
+  # Recursive method, pass the matched words & what's left of the number string 
+  # until there is nothing left to match
+  def search(number, word_chunks = Array.new)
+    @words.inject(Array.new) do |all, (digits, words)|
+      if remaining = match(number, digits)
+        new_chunks = (word_chunks.dup << words)
+        if remaining.empty? # Exit condition, once this is reached we don't search anymore.
+          all << new_chunks
+        else
+          all.push(*search(remaining, new_chunks))
+        end
+      else
+        all
+      end
+    end
+  end
+  
+  def match(number, digits)
+    if number[0, digits.length] == digits
+      number[digits.length..-1]
+    else
+      nil
+    end
+  end
+
+  # Take a single word chunk and combine it with all combos/ once we reach the final 
+  # word group (new_chunks.empty?) we exit. 
+  def word_chunks_to_strings(word_chunks)
+    word_chunk, *new_chunks = word_chunks.dup
+    if new_chunks.empty?
+      word_chunk.map { |word| word.upcase }
+    else
+      word_chunk.map do |word|
+        word_chunks_to_strings(new_chunks).map { |words| "#{word.upcase}-#{words}"}
+      end.flatten
+    end
+  end
+
+  def encode(letter)
+    case letter.downcase
+    when "a", "b", "c"      then "2"
+    when "d", "e", "f"      then "3"
+    when "g", "h", "i"      then "4"
+    when "j", "k", "l"      then "5"
+    when "m", "n", "o"      then "6"
+    when "p", "q", "r", "s" then "7"
+    when "t", "u", "v"      then "8"
+    when "w", "x", "y", "z" then "9"
+    end
   end
 end
 
-phone_dict = PhoneDictionary.new  
-puts "Enter your 7 digit number "
-user_input = gets.chomp
-puts "Thinking..."
-if phone_dict.words_for(user_input).empty?
-  puts "No words for this number, sorry"
-else
-  puts phone_dict.words_for(user_input)
-end
+# Running the program:
+# $ ruby phone_dictionary.rb
+# You'll be prompted to enter the phone number, enter the number and watch the results roll in.
+# This one is way quicker than my last implementation. 
+dictionary = if ARGV.first == "-d"
+               ARGV.shift
+               PhoneDictionary.new(ARGV.shift)
+             else
+               PhoneDictionary.new("/usr/share/dict/words")
+             end
+puts "Enter a 7 digit phone number "
+user_input = gets.chomp.delete("^0-9")
+puts dictionary.number_to_words(user_input)
